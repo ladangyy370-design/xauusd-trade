@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101827">
+<title>XAUUSD Trade Journal v2.2</title>
+<style>
+:root{--bg:#0b1220;--panel:#121d2e;--panel2:#18263a;--line:#29384d;--txt:#edf3fb;--muted:#9aabc0;--gold:#e7b85c;--green:#36c98b;--red:#ff6b75;--blue:#76a9fa}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font:15px system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{padding:22px 18px 14px;background:linear-gradient(135deg,#17263c,#101827);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:3}
+.brand{font-size:19px;font-weight:800;letter-spacing:.2px}.sub{font-size:12px;color:var(--muted);margin-top:3px}
+main{max-width:760px;margin:auto;padding:15px 14px 90px}.tabs{display:flex;gap:7px;overflow:auto;padding:12px 14px;background:var(--bg);position:sticky;top:76px;z-index:2}
+.tabs button{white-space:nowrap;border:1px solid var(--line);background:var(--panel);color:var(--muted);padding:9px 13px;border-radius:20px;font-weight:650}
+.tabs button.active{background:var(--gold);color:#171717;border-color:var(--gold)}
+.page{display:none}.page.active{display:block}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:14px;margin-bottom:11px}
+.stat small,.muted{color:var(--muted)}.stat small{font-size:12px}.stat strong{display:block;font-size:21px;margin-top:6px;overflow-wrap:anywhere}
+h2{font-size:17px;margin:5px 0 13px}h3{font-size:14px;margin:0 0 10px;color:var(--gold)}
+label{display:block;color:var(--muted);font-size:12px;margin:10px 0 5px}
+input,select,textarea{width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:#0d1726;color:var(--txt);font:inherit;outline:none}
+textarea{min-height:65px;resize:vertical}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+button.primary{border:0;background:var(--gold);color:#171717;padding:12px 15px;border-radius:10px;font-weight:800;width:100%;margin-top:13px}
+button.secondary,button.danger{border:1px solid var(--line);background:var(--panel2);color:var(--txt);padding:9px 11px;border-radius:9px;font-weight:650}
+button.danger{color:var(--red);border-color:#63333b}.result{background:#0d1726;border-radius:10px;padding:12px;margin-top:11px;line-height:1.7}
+.good{color:var(--green)}.bad{color:var(--red)}.gold{color:var(--gold)}
+.trade{border:1px solid var(--line);border-radius:11px;padding:12px;margin-top:9px;background:#0d1726}
+.tradehead{display:flex;justify-content:space-between;gap:8px;font-weight:750}.trade p{margin:6px 0;color:var(--muted);font-size:12px}
+.actions{display:flex;gap:7px;margin-top:8px}.actions button{flex:1}
+canvas{width:100%;height:210px;background:#0d1726;border-radius:10px}
+footer{text-align:center;color:var(--muted);font-size:11px;padding:18px}
+@media(min-width:600px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}.tabs{justify-content:center}}
+</style>
+</head>
+<body>
+<header><div class="brand">◈ XAUUSD TRADE JOURNAL</div><div class="sub">Trading tracker • HFM Zero • USD account</div></header>
+<nav class="tabs">
+<button class="active" data-page="dashboard">Dashboard</button><button data-page="journal">Jurnal</button><button data-page="risk">Kalkulator SL/TP</button><button data-page="lot">Lot Size</button><button data-page="compound">Compounding</button><button data-page="settings">Pengaturan</button>
+</nav>
+<main>
+<section id="dashboard" class="page active">
+<div class="grid">
+<div class="card stat"><small>Balance saat ini</small><strong id="balance">$0.00</strong></div>
+<div class="card stat"><small>Total P/L</small><strong id="totalpl">$0.00</strong></div>
+<div class="card stat"><small>Win rate</small><strong id="winrate">0%</strong></div>
+<div class="card stat"><small>Total transaksi</small><strong id="count">0</strong></div>
+</div>
+<div class="card"><h2>Grafik perkembangan balance</h2><canvas id="balanceChart" width="700" height="230"></canvas></div>
+<div class="card"><h2>Ringkasan trading</h2><div class="row"><div><small class="muted">WIN</small><h2 id="wins" class="good">0</h2></div><div><small class="muted">LOSS</small><h2 id="losses" class="bad">0</h2></div></div><div id="summary" class="muted">Belum ada transaksi.</div></div>
+</section>
+
+<section id="journal" class="page">
+ <div class="card"><h2>Tambah transaksi</h2>
+ <div class="row"><div><label>Tanggal</label><input id="tradeDate" type="date"></div><div><label>Hasil</label><select id="outcome"><option value="WIN">WIN</option><option value="LOSS">LOSS</option><option value="BE">BREAK EVEN</option></select></div></div>
+ <div class="row"><div><label>Lot</label><input id="tradeLot" type="number" step="0.01" min="0.01" value="0.01"></div><div><label>Stop Loss (pips)</label><input id="tradeSL" type="number" step="1" min="0" placeholder="Contoh: 30"></div></div>
+ <div class="row"><div><label>Take Profit (pips)</label><input id="tradeTP" type="number" step="1" min="0" placeholder="Contoh: 50"></div><div><label>Komisi (USD per 0,01 lot)</label><input id="tradeCommission" type="number" step="0.01" min="0" value="0"></div></div>
+ <label>Estimasi P/L bersih</label><div class="result" id="journalPreview">$0.00</div>
+ <label>Catatan (opsional)</label><textarea id="note" placeholder="Setup, alasan entry, evaluasi..."></textarea>
+ <button class="primary" id="saveTrade">Simpan transaksi</button>
+ <div class="muted" style="font-size:11px;margin-top:8px">P/L otomatis memakai TP saat WIN dan SL saat LOSS. BE selalu $0,00. Asumsi 1 pip = $10 per 1,00 lot (=$0,10 pada 0,01 lot); komisi dipotong pada WIN/LOSS sesuai lot.</div></div>
+ <div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h2>Riwayat transaksi</h2><button class="secondary" id="exportCsv">Export CSV</button></div><div id="history"></div><button class="danger" id="clearHistory" style="width:100%;margin-top:12px">Hapus seluruh riwayat</button></div>
+ </section>
+
+<section id="risk" class="page">
+<div class="card"><h2>Kalkulator potensi SL / TP</h2>
+<div class="row"><div><label>Lot</label><input id="riskLot" type="number" value="0.01" min="0.01" step="0.01"></div><div><label>SL (pips)</label><input id="slPips" type="number" value="100" min="0"></div></div>
+<div class="row"><div><label>TP (pips)</label><input id="tpPips" type="number" value="200" min="0"></div><div><label>Komisi per 0,01 lot (USD)</label><input id="commission" type="number" value="0" min="0" step="0.1"></div></div>
+<button class="primary" id="calcRisk">Hitung SL & TP</button>
+<div class="result" id="riskResult">Masukkan lot, SL, dan TP lalu tekan Hitung.</div>
+<p class="muted" style="font-size:11px">Asumsi kalkulator: 1 pip = $10 per 1,00 lot (=$0,10 per 0,01 lot). Spread, swap, slippage, dan komisi dapat mengubah hasil aktual. Verifikasi spesifikasi simbol di HFM.</p>
+</div>
+</section>
+
+<section id="lot" class="page">
+<div class="card"><h2>Kalkulator lot berdasarkan risiko</h2>
+<label>Balance akun (USD)</label><input id="lotBalance" type="number" value="15" min="0" step="0.01">
+<div class="row"><div><label>Risiko (%)</label><input id="riskPercent" type="number" value="1" min="0.01" step="0.1"></div><div><label>Stop loss (pips)</label><input id="lotSl" type="number" value="100" min="1"></div></div>
+<button class="primary" id="calcLot">Hitung rekomendasi lot</button><div class="result" id="lotResult">Hasil perhitungan akan tampil di sini.</div>
+<p class="muted" style="font-size:11px">Rumus memakai nilai 1 pip = $10 per 1,00 lot. Pembulatan lot ke bawah kelipatan 0,01 agar risiko tidak melampaui target. Saldo USD perlu disesuaikan dengan saldo akun sebenarnya.</p>
+</div>
+</section>
+
+<section id="compound" class="page">
+<div class="card"><h2>Simulasi compounding</h2>
+<label>Modal awal (USD)</label><input id="startCapital" type="number" value="15" min="0" step="0.01">
+<div class="row"><div><label>Profit per periode (%)</label><input id="compoundRate" type="number" value="2" step="0.1"></div><div><label>Jumlah periode</label><input id="periods" type="number" value="30" min="1"></div></div>
+<button class="primary" id="calcCompound">Hitung compounding</button><div class="result" id="compoundResult">Masukkan parameter simulasi.</div><canvas id="compoundChart" width="700" height="230" style="margin-top:12px"></canvas>
+<p class="muted" style="font-size:11px">Simulasi matematis, bukan proyeksi atau jaminan hasil trading. Tidak memperhitungkan periode rugi, biaya, dan perubahan risiko.</p>
+</div>
+</section>
+
+<section id="settings" class="page">
+<div class="card"><h2>Pengaturan akun</h2>
+<label>Edit balance / modal awal akun (USD)</label><input id="initialBalance" type="number" value="15" step="0.01">
+<label>Kurs USD ke IDR (otomatis)</label><input id="exchangeRate" type="number" value="16000" min="1" readonly>
+ <div class="muted" style="font-size:11px;margin-top:5px">Balance awal dapat diubah kapan saja. Nilai rupiah diperbarui otomatis dari data kurs pasar saat aplikasi dibuka dan berkala selama aplikasi aktif.</div>
+<button class="primary" id="saveSettings">Simpan pengaturan</button>
+<button class="secondary" id="getRate" style="width:100%;margin-top:9px">Ambil kurs terbaru</button>
+<div id="rateStatus" class="muted" style="font-size:12px;margin-top:8px">Kurs disimpan secara lokal. Perbarui saat diperlukan.</div>
+<p class="muted" style="font-size:11px;margin-top:14px">Data jurnal dan pengaturan disimpan di penyimpanan browser HP ini (localStorage). Jangan hapus data browser jika ingin mempertahankan riwayat. Buat backup CSV secara berkala.</p>
+</div>
+</section>
+<footer>XAUUSD Trade Journal • Versi 2.2 • Gunakan demo untuk menguji perhitungan</footer>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const defaults={initialBalance:15,rate:16000,rateUpdated:null,commission:0,trades:[]};
+let data={...defaults,...JSON.parse(localStorage.getItem('xauJournalV2')||'{}')};
+function persist(){localStorage.setItem('xauJournalV2',JSON.stringify(data))}
+function money(n,c='$'){return c+Number(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function idr(n){return 'Rp '+Number(n||0).toLocaleString('id-ID',{maximumFractionDigits:0})}
+function calcTradePnl(outcome,slPips,tpPips,lot,commissionPer001){
+ if(outcome==='BE') return 0;
+ const pips=outcome==='LOSS'?Number(slPips):Number(tpPips);
+ const gross=Math.max(0,pips||0)*Math.max(0,Number(lot)||0)*10;
+ const fee=Math.max(0,Number(commissionPer001)||0)*(Math.max(0,Number(lot)||0)/0.01);
+ return outcome==='LOSS'?-(gross+fee):gross-fee;
+}
+function render(){
+ $('initialBalance').value=data.initialBalance;$('exchangeRate').value=data.rate;$('commission').value=data.commission;$('tradeCommission').value=data.commission;
+ const pl=data.trades.reduce((s,t)=>s+Number(t.pnl||0),0),bal=Number(data.initialBalance)+pl,w=data.trades.filter(t=>t.pnl>0).length,l=data.trades.filter(t=>t.pnl<0).length;
+ $('balance').textContent=money(bal);$('totalpl').textContent=money(pl);$('totalpl').className=pl>=0?'good':'bad';
+ $('winrate').textContent=(data.trades.length?w/data.trades.length*100:0).toFixed(1)+'%';$('count').textContent=data.trades.length;$('wins').textContent=w;$('losses').textContent=l;
+ $('summary').textContent=`Modal awal ${money(data.initialBalance)} • Kurs ${idr(data.rate)} per USD • Balance ${idr(bal*data.rate)} • P/L rupiah ${idr(pl*data.rate)}`;
+ const hist=$('history');hist.innerHTML='';
+ if(!data.trades.length)hist.innerHTML='<p class="muted">Belum ada transaksi tersimpan.</p>';
+ [...data.trades].reverse().forEach(t=>{const div=document.createElement('div');div.className='trade';div.innerHTML=`<div class="tradehead"><span>${t.date} • ${t.outcome}</span><span class="${t.pnl>=0?'good':'bad'}">${money(t.pnl)}</span></div><p>Lot: ${t.lot||'-'} • SL: ${t.slPips??'-'} pips • TP: ${t.tpPips??(t.pips??'-')} pips • Komisi: ${money(t.fee||0)} • ${idr(t.pnl*data.rate)}</p><p>${escapeHtml(t.note||'Tanpa catatan')}</p><div class="actions"><button class="secondary" data-del="${t.id}">Hapus transaksi</button></div>`;hist.appendChild(div)});
+ hist.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{if(confirm('Hapus transaksi ini?')){data.trades=data.trades.filter(t=>t.id!==b.dataset.del);persist();render()}});
+ drawChart($('balanceChart'),[Number(data.initialBalance),...data.trades.reduce((a,t)=>{a.push(a[a.length-1]+Number(t.pnl||0));return a},[Number(data.initialBalance)]).slice(1)]);
+}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function drawChart(canvas,vals){const c=canvas.getContext('2d'),w=canvas.width,h=canvas.height;c.clearRect(0,0,w,h);c.strokeStyle='#29384d';c.lineWidth=1;for(let i=1;i<5;i++){c.beginPath();c.moveTo(20,h*i/5);c.lineTo(w-15,h*i/5);c.stroke()}if(!vals.length)return;let min=Math.min(...vals),max=Math.max(...vals);if(min===max){min-=1;max+=1}c.strokeStyle='#e7b85c';c.lineWidth=4;c.beginPath();vals.forEach((v,i)=>{let x=25+(w-50)*(vals.length===1?0:i/(vals.length-1)),y=h-20-(v-min)/(max-min)*(h-40);i?c.lineTo(x,y):c.moveTo(x,y)});c.stroke();c.fillStyle='#9aabc0';c.font='18px sans-serif';c.fillText('Balance: '+money(vals[vals.length-1]),25,25)}
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));b.classList.add('active');$(b.dataset.page).classList.add('active')});
+$('tradeDate').value=new Date().toISOString().slice(0,10);
+function updateJournalPreview(){
+ const pnl=calcTradePnl($('outcome').value,+$('tradeSL').value,+$('tradeTP').value,+$('tradeLot').value,+$('tradeCommission').value);
+ const el=$('journalPreview');el.textContent=money(pnl);el.className='result '+(pnl>=0?'good':'bad');
+}
+['outcome','tradeSL','tradeTP','tradeLot','tradeCommission'].forEach(id=>$(id).addEventListener('input',updateJournalPreview));
+$('saveTrade').onclick=()=>{
+ const sl=+$('tradeSL').value,tp=+$('tradeTP').value,lot=+$('tradeLot').value,feePer001=+$('tradeCommission').value,outcome=$('outcome').value;
+ if(!Number.isFinite(lot)||lot<=0||feePer001<0||(outcome==='WIN'&&(!Number.isFinite(tp)||tp<=0))||(outcome==='LOSS'&&(!Number.isFinite(sl)||sl<=0))){alert('Masukkan lot serta TP untuk WIN atau SL untuk LOSS dengan benar.');return}
+ const pnl=calcTradePnl(outcome,sl,tp,lot,feePer001),fee=outcome==='BE'?0:feePer001*(lot/0.01);
+ data.trades.push({id:Date.now().toString(),date:$('tradeDate').value||new Date().toISOString().slice(0,10),outcome,slPips:sl,tpPips:tp,pips:outcome==='LOSS'?sl:tp,lot,fee,pnl,note:$('note').value.trim()});
+ persist();$('tradeSL').value='';$('tradeTP').value='';$('note').value='';render();updateJournalPreview();alert('Transaksi tersimpan.');
+};
+$('clearHistory').onclick=()=>{if(confirm('Yakin hapus SELURUH riwayat transaksi? Tindakan ini tidak dapat dibatalkan.')){data.trades=[];persist();render()}};
+$('exportCsv').onclick=()=>{const rows=[['Tanggal','Hasil','SL Pips','TP Pips','Lot','Komisi USD','P/L USD','Catatan'],...data.trades.map(t=>[t.date,t.outcome,t.slPips??'',t.tpPips??(t.pips??''),t.lot,t.fee??0,t.pnl,t.note])];const csv=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='XAUUSD_Trade_Journal.csv';a.click();URL.revokeObjectURL(a.href)};
+$('calcRisk').onclick=()=>{const lot=+$('riskLot').value,sl=+$('slPips').value,tp=+$('tpPips').value,comm=+$('commission').value;if(lot<=0||sl<0||tp<0||comm<0){alert('Periksa input.');return}const fee=comm*(lot/0.01),loss=sl*lot*10+fee,profit=tp*lot*10-fee;$('riskResult').innerHTML=`Potensi rugi (SL): <b class="bad">${money(-loss)}</b> / ${idr(-loss*data.rate)}<br>Potensi untung (TP): <b class="good">${money(profit)}</b> / ${idr(profit*data.rate)}<br>Komisi: ${money(fee)}<br>Risk : Reward = 1 : ${(sl?tp/sl:0).toFixed(2)}<br><small class="muted">1 pip = $10 per 1,00 lot. Komisi dimasukkan per 0,01 lot.</small>`};
+$('calcLot').onclick=()=>{const bal=+$('lotBalance').value,risk=+$('riskPercent').value,sl=+$('lotSl').value;if(bal<=0||risk<=0||sl<=0){alert('Masukkan angka lebih dari 0.');return}const riskUsd=bal*risk/100,raw=riskUsd/(sl*10),lot=Math.floor(raw*100)/100;$('lotResult').innerHTML=`Risiko maksimum: <b>${money(riskUsd)}</b><br>Lot teoritis: ${raw.toFixed(4)}<br>Rekomendasi lot dibulatkan ke bawah: <b class="gold">${lot.toFixed(2)}</b><br>Perkiraan risiko pada lot tersebut: ${money(lot*sl*10)}<br>Nilai risiko rupiah: ${idr(riskUsd*data.rate)}`};
+$('calcCompound').onclick=()=>{let cap=+$('startCapital').value,rate=+$('compoundRate').value/100,n=Math.floor(+$('periods').value);if(cap<=0||n<1){alert('Periksa modal dan jumlah periode.');return}let vals=[cap];for(let i=0;i<n;i++)vals.push(vals[vals.length-1]*(1+rate));$('compoundResult').innerHTML=`Modal akhir: <b class="good">${money(vals.at(-1))}</b><br>Total pertumbuhan: ${money(vals.at(-1)-cap)}<br>Setara rupiah: ${idr(vals.at(-1)*data.rate)}<br>Periode: ${n}`;drawChart($('compoundChart'),vals)};
+$('saveSettings').onclick=()=>{const initial=+$('initialBalance').value,comm=+$('commission').value;if(initial<0||comm<0){alert('Periksa nilai pengaturan.');return}data.initialBalance=initial;data.commission=comm;persist();render();alert('Pengaturan disimpan.')};
+async function refreshRate(force=false){
+ const status=$('rateStatus');if(status)status.textContent='Memperbarui kurs USD/IDR dari data pasar...';
+ try{
+  const r=await fetch('https://open.er-api.com/v6/latest/USD',{cache:'no-store'});
+  if(!r.ok)throw Error('Koneksi gagal');
+  const j=await r.json();if(!j.rates||!j.rates.IDR)throw Error('Data kurs tidak tersedia');
+  data.rate=Number(j.rates.IDR);data.rateUpdated=j.time_last_update_utc||new Date().toISOString();persist();render();
+  if(status)status.textContent='Kurs otomatis: 1 USD = '+idr(data.rate)+' • Data: '+(j.time_last_update_utc||'terbaru');
+ }catch(e){
+  if(status)status.textContent='Tidak dapat mengambil kurs terbaru. Aplikasi memakai kurs terakhir yang tersimpan: '+idr(data.rate);
+ }
+}
+$('getRate').onclick=()=>refreshRate(true);
+render();$('calcRisk').click();updateJournalPreview();refreshRate();setInterval(()=>refreshRate(),6*60*60*1000);
+</script>
+</body></html>
