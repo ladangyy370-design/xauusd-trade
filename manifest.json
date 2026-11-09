@@ -1,0 +1,33 @@
+{
+  "id": "/xauusd-trade-journal/",
+  "name": "XAUUSD Trade Journal",
+  "short_name": "XAUUSD Journal",
+  "description": "Jurnal trading XAUUSD, dashboard, kalkulator risiko, dan evaluasi transaksi.",
+  "start_url": "/xauusd-trade-journal/",
+  "scope": "/xauusd-trade-journal/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b1220",
+  "theme_color": "#d6ad55",
+  "lang": "id",
+  "icons": [
+    {
+      "src": "/xauusd-trade-journal/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/xauusd-trade-journal/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/xauusd-trade-journal/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
