@@ -1,5 +1,5 @@
-const CACHE_NAME = "xauusd-journal-v1";
-const APP_ROOT = "/xauusd-trade-journal/";
+const CACHE_NAME = "xauusd-journal-v2";
+const APP_ROOT = "/xauusd-trade/";
 const CORE_ASSETS = [
   APP_ROOT,
   APP_ROOT + "index.html",
